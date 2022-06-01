@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="WpfClient.UserControls.SymbolUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             Name="SymbolControl"
+             d:DesignHeight="600" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="300*" />
+        </Grid.RowDefinitions>
+        
+        <TextBlock Margin="10" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Run FontSize="25" FontWeight="Bold" Text="{Binding CurrentUser.SelectedSymbol.Symbol }" />
+            <Run FontSize="17" Text="{Binding CurrentUser.SelectedSymbol.Price, StringFormat={} {0:N8}}" />
+        </TextBlock>
+
+        <GroupBox Grid.Row="1" Margin="10">
+            <GroupBox.Header>
+                <TextBlock Text="24 Saatlik İstatistikler" FontSize="20"></TextBlock>
+            </GroupBox.Header>
+
+            <StackPanel Margin="10">
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="24 Saatlik Değişim (%)"></TextBlock>
+                    <TextBlock Text="{Binding CurrentUser.SelectedSymbol.PriceChangePercent, StringFormat={} {0:N2}%}" Grid.Column="1" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="En Yüksek Değer"></TextBlock>
+                    <TextBlock Text="{Binding CurrentUser.SelectedSymbol.HighPrice}" Grid.Column="1" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="En Düşük Değer"></TextBlock>
+                    <TextBlock Text="{Binding CurrentUser.SelectedSymbol.LowPrice}" Grid.Column="1" HorizontalAlignment="Right"/>
+                </Grid>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Volume"></TextBlock>
+                    <TextBlock Text="{Binding CurrentUser.SelectedSymbol.Volume}" Grid.Column="1" HorizontalAlignment="Right"/>
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Grid.Row="3" Margin="10" Visibility="{Binding CurrentUser.IsCredentialed, Converter={StaticResource BoolToVis}}">
+            <GroupBox.Header>
+                <TextBlock Text="Açık Emirler" FontSize="20"></TextBlock>
+            </GroupBox.Header>
+            <DataGrid Margin="5" ItemsSource="{ Binding CurrentUser.SelectedSymbol.Orders, UpdateSourceTrigger=PropertyChanged}" 
+                      AutoGenerateColumns="False" 
+                      CanUserAddRows="False" 
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="150*" Header="Time" IsReadOnly="True"
+                        Binding="{Binding Time}"/>
+                    <DataGridTextColumn Width="125*" Header="Type" IsReadOnly="True"
+                        Binding="{Binding Type}"/>
+                    <DataGridTextColumn Width="125*" Header="Side" IsReadOnly="True"
+                        Binding="{Binding PositionSide}"/>
+                    <DataGridTextColumn Width="100*" Header="Amount" IsReadOnly="True"
+                        Binding="{Binding Price}"/>
+                    <DataGridTextColumn Width="100*" Header="Stop Price" IsReadOnly="True"
+                        Binding="{Binding StopPrice}"/>
+                    <DataGridTextColumn Width="100*" Header="Filled" IsReadOnly="True"
+                        Binding="{Binding Filled}"/>
+                    <DataGridTextColumn Width="100*" Header="Reduce Only" IsReadOnly="True"
+                        Binding="{Binding ReduceOnly}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+    </Grid>
+</UserControl>
