@@ -197,7 +197,7 @@ namespace WpfClient.ViewModels
         {
             // Get USDT & Coins prices
             var resultUsd = await Client.UsdFuturesApi.ExchangeData.GetPricesAsync();
-
+            
             if (resultUsd.Success)
             {
                 AllPrices = new ObservableCollection<SymbolViewModel>( resultUsd.Data.Select(r => new SymbolViewModel(r.Symbol, r.Price)).OrderBy(x => x.Symbol) );
@@ -305,18 +305,16 @@ namespace WpfClient.ViewModels
             if(PausedBots.Any(x => x.Equals(bot)))
             {
                 PausedBots.Remove(bot);
+                await GetOpenOrders(bot.Symbol);
+
+                if (bot.Symbol.Orders.Any(x => x.Id.Equals(bot.LastOpenOrderId))) return;
+
                 bot.IsEnabled = true;
                 ActiveBots.Add(bot);
 
                 SelectedBot = bot;
                 
-                await GetOpenOrders(bot.Symbol);
                 AddLog($"{bot.Symbol.Symbol} botu tekrar başlatıldı.");
-
-                if (bot.Symbol.Orders.Any(x => x.Id.Equals(bot.LastOpenOrderId))) return;
-
-                bot.AddLog("Son açık işlem bulunamadı.");
-                await PlaceReverseOpenOrderAsync(bot);
 
                 return;
             }
@@ -331,14 +329,14 @@ namespace WpfClient.ViewModels
                 if(bot.FirstOrderType == PositionSide.Long)
                 {
                     side = OrderSide.Sell;
-                    quan = bot.SizeLower / bot.StopPriceLower;
-                    stopPrice = bot.StopPriceLower;
+                    quan = bot.SizeShort / bot.StopPriceShort;
+                    stopPrice = bot.StopPriceShort;
                 }
                 else
                 {
                     side = OrderSide.Buy;
-                    quan = bot.SizeUpper / bot.StopPriceUpper;
-                    stopPrice = bot.StopPriceUpper;
+                    quan = bot.SizeLong / bot.StopPriceLong;
+                    stopPrice = bot.StopPriceLong;
                 }
 
                 var resultOpenOrder = await Client.UsdFuturesApi.Trading.PlaceOrderAsync(
@@ -351,6 +349,7 @@ namespace WpfClient.ViewModels
                 if (resultOpenOrder.Success)
                 {
                     bot.LastOpenOrderId = resultOpenOrder.Data.Id;
+                    bot.FirstReverseOrderId = resultOpenOrder.Data.Id;
                     bot.AddLog($"Başlangıç açık emiri başarıyla verildi. Id : {resultOpenOrder.Data.Id}");
                 }
                 else
@@ -369,7 +368,7 @@ namespace WpfClient.ViewModels
 
                 if (resultOrder.Success)
                 {
-                    bot.LastOrderId = resultOrder.Data.Id;
+                    bot.FirstOrderId = resultOrder.Data.Id;
                     bot.AddLog($"Başlangıç işlemi başarıyla açıldı. Id : {resultOrder.Data.Id}");
                 }
                 else
@@ -421,8 +420,8 @@ namespace WpfClient.ViewModels
 
         private async Task PlaceReverseOpenOrderAsync(BotViewModel bot)
         {
-            var price = bot.LastOpenOrderPositionSide == PositionSide.Long ? (bot.SizeLower ?? 0)/ bot.StopPriceLower
-                                                                           : (bot.SizeUpper ?? 0)/ bot.StopPriceLower;
+            var price = bot.LastOpenOrderPositionSide == PositionSide.Long ? (bot.SizeShort ?? 0)/ bot.StopPriceShort
+                                                                           : (bot.SizeLong ?? 0)/ bot.StopPriceLong;
             var result = await Client.UsdFuturesApi.Trading.PlaceOrderAsync(
                                                                     bot.Symbol.Symbol,
                                                                     bot.LastOpenOrderPositionSide == PositionSide.Short ? OrderSide.Buy : OrderSide.Sell,
@@ -430,7 +429,7 @@ namespace WpfClient.ViewModels
                                                                     price,
                                                                     workingType: WorkingType.Mark,
                                                                     positionSide: bot.LastOpenOrderPositionSide == PositionSide.Short ? PositionSide.Long : PositionSide.Short,
-                                                                    stopPrice: bot.LastOpenOrderPositionSide == PositionSide.Long ? bot.StopPriceLower : bot.StopPriceUpper);
+                                                                    stopPrice: bot.LastOpenOrderPositionSide == PositionSide.Long ? bot.StopPriceShort : bot.StopPriceLong);
             if (result.Success)
             {
                 bot.LastOpenOrderId = result.Data.Id;

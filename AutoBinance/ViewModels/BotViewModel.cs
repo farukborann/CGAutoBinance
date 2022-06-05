@@ -1,5 +1,6 @@
 ﻿using Binance.Net.Enums;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -79,48 +80,117 @@ namespace WpfClient.ViewModels
         }
 
         //Upper
-        private decimal? stopPriceUpper;
-        public decimal? StopPriceUpper
+        private decimal? stopPriceLong;
+        public decimal? StopPriceLong
         {
-            get { return stopPriceUpper; }
+            get { return stopPriceLong; }
             set
             {
-                stopPriceUpper = value;
-                RaisePropertyChangedEvent(nameof(StopPriceUpper));
+                stopPriceLong = value;
+                RaisePropertyChangedEvent(nameof(StopPriceLong));
             }
         }
 
-        private decimal? sizeUpper;
-        public decimal? SizeUpper
+        private decimal? sizeLong;
+        public decimal? SizeLong
         {
-            get { return sizeUpper; }
+            get { return sizeLong; }
             set
             {
-                sizeUpper = value;
-                RaisePropertyChangedEvent(nameof(SizeUpper));
+                sizeLong = value;
+                RaisePropertyChangedEvent(nameof(SizeLong));
+                RaisePropertyChangedEvent(nameof(ProfitTextLong));
             }
         }
 
         //Lower
-        private decimal? stopPriceLower;
-        public decimal? StopPriceLower
+        private decimal? stopPriceShort;
+        public decimal? StopPriceShort
         {
-            get { return stopPriceLower; }
+            get { return stopPriceShort; }
             set
             {
-                stopPriceLower = value;
-                RaisePropertyChangedEvent(nameof(StopPriceLower));
+                stopPriceShort = value;
+                RaisePropertyChangedEvent(nameof(StopPriceShort));
             }
         }
 
-        private decimal? sizeLower;
-        public decimal? SizeLower
+        private decimal? sizeShort;
+        public decimal? SizeShort
         {
-            get { return sizeLower; }
+            get { return sizeShort; }
             set
             {
-                sizeLower = value;
-                RaisePropertyChangedEvent(nameof(SizeLower));
+                sizeShort = value;
+                RaisePropertyChangedEvent(nameof(SizeShort));
+                RaisePropertyChangedEvent(nameof(ProfitTextShort));
+            }
+        }
+
+        //Calc Profit
+        private decimal? coinLeverageLong;
+        public decimal? CoinLeverageLong
+        {
+            get { return coinLeverageLong; }
+            set
+            {
+                coinLeverageLong = value;
+                RaisePropertyChangedEvent(nameof(coinLeverageLong));
+                RaisePropertyChangedEvent(nameof(ProfitTextLong));
+            }
+        } 
+        
+        private decimal? profitUSDTLong;
+        public decimal? ProfitUSDTLong
+        {
+            get { return profitUSDTLong; }
+            set
+            {
+                profitUSDTLong = value;
+                RaisePropertyChangedEvent(nameof(profitUSDTLong));
+                RaisePropertyChangedEvent(nameof(ProfitTextLong));
+            }
+        }
+
+        public string? ProfitTextLong
+        {
+            get 
+            {
+                decimal? profitPrice = symbol.Price * ((profitUSDTLong / SizeLong * 100 / coinLeverageLong) + 1);
+                return $"USDT Kar/Zarar İçin {symbol.Symbol} Fiyatı {(profitPrice == null ? 0 : decimal.Round((decimal)profitPrice, 8)).ToString(new CultureInfo("en-US", false))} USDT Olmalıdır";
+            }
+        }
+
+        private decimal? coinLeverageShort;
+        public decimal? CoinLeverageShort
+        {
+            get { return coinLeverageShort; }
+            set
+            {
+                coinLeverageShort = value;
+                RaisePropertyChangedEvent(nameof(coinLeverageShort));
+                RaisePropertyChangedEvent(nameof(ProfitTextShort));
+            }
+        }
+
+        private decimal? profitUSDTShort;
+        public decimal? ProfitUSDTShort
+        {
+            get { return profitUSDTShort; }
+            set
+            {
+                profitUSDTShort = value;
+                RaisePropertyChangedEvent(nameof(profitUSDTShort));
+                RaisePropertyChangedEvent(nameof(ProfitTextShort));
+            }
+        }
+
+        public string? ProfitTextShort
+        {
+            get
+            {
+                decimal? profitPrice = symbol.Price * ((profitUSDTShort / SizeShort * 100 / coinLeverageShort) + 1);
+                return $"USDT Kar/Zarar İçin {symbol.Symbol} Fiyatı {(profitPrice == null ? 0 : decimal.Round((decimal)profitPrice, 8)).ToString(new CultureInfo("en-US", false))} USDT Olmalıdır";
             }
         }
 
@@ -144,7 +214,9 @@ namespace WpfClient.ViewModels
             });
         }
 
-        public long LastOrderId { get; set; }
+        public long FirstOrderId { get; set; }
+        
+        public long FirstReverseOrderId { get; set; }
 
         public long LastOpenOrderId { get; set; }
 
@@ -163,7 +235,8 @@ namespace WpfClient.ViewModels
             firstOrderType = PositionSide.Long;
 
             LastOpenOrderId = 0;
-            LastOrderId = 0;
+            FirstOrderId = 0;
+            FirstReverseOrderId = 0;
             LastOpenOrderPositionSide = FirstOrderType == PositionSide.Long ? PositionSide.Short : PositionSide.Long;
 
             ExpiredOrderUpdated = false;

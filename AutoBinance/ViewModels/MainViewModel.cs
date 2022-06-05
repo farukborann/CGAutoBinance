@@ -83,6 +83,8 @@ namespace WpfClient.ViewModels
         }
         #endregion
 
+        public ICommand IExitCommand { get; set; }
+
         public ICommand IBotCommand { get; set; }
         public ICommand IResetBotCommand { get; set; }
 
@@ -132,6 +134,8 @@ namespace WpfClient.ViewModels
 
             users = new ObservableCollection<UserViewModel>();
 
+            IExitCommand = new DelegateCommand(async (o) => await ExitCommand());
+            
             IBotCommand = new DelegateCommand(async (o) => await BotCommand(CurrentUser.SelectedBot));
             IResetBotCommand = new DelegateCommand(async (o) => await CurrentUser.ResetBot(CurrentUser.SelectedBot));
 
@@ -152,6 +156,45 @@ namespace WpfClient.ViewModels
             Task.Run(() => CurrentUser.GetAllSymbols());
         }
 
+        public async Task ExitCommand()
+        {
+            var result = System.Windows.MessageBox.Show("Botlara Ait Tüm İşlemler Sonlandırılsın mı ?", "Dikkat!", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (result == System.Windows.MessageBoxResult.Yes)
+            {
+                foreach (var user in Users)
+                {
+                    foreach(var bot in user.ActiveBots.ToList()) { user.PauseBot(bot); }
+                    foreach(var bot in user.PausedBots.ToList())
+                    {
+                        await user.Client.UsdFuturesApi.Trading.CancelAllOrdersAsync(bot.Symbol.Symbol);
+
+                        var getResult = await user.Client.UsdFuturesApi.Trading.GetOrderAsync(bot.Symbol.Symbol, bot.FirstOrderId);
+                        if (getResult.Success)
+                        {
+                            await user.Client.UsdFuturesApi.Trading.PlaceOrderAsync(bot.Symbol.Symbol,
+                                                                                    getResult.Data.Side == Binance.Net.Enums.OrderSide.Buy ? Binance.Net.Enums.OrderSide.Sell : Binance.Net.Enums.OrderSide.Buy,
+                                                                                    Binance.Net.Enums.FuturesOrderType.Market,
+                                                                                    getResult.Data.Quantity,
+                                                                                    positionSide: getResult.Data.PositionSide);
+                        }
+
+                        getResult = await user.Client.UsdFuturesApi.Trading.GetOrderAsync(bot.Symbol.Symbol, bot.FirstReverseOrderId);
+                        if (bot.FirstReverseOrderId != 0 && getResult)
+                        {
+
+                            await user.Client.UsdFuturesApi.Trading.PlaceOrderAsync(bot.Symbol.Symbol,
+                                                                                    getResult.Data.Side == Binance.Net.Enums.OrderSide.Buy ? Binance.Net.Enums.OrderSide.Sell : Binance.Net.Enums.OrderSide.Buy,
+                                                                                    Binance.Net.Enums.FuturesOrderType.Market,
+                                                                                    getResult.Data.Quantity,
+                                                                                    positionSide: getResult.Data.PositionSide);
+                        }
+                    }
+                }
+            }
+
+            Environment.Exit(0);
+        }        
+        
         public async Task BotCommand(BotViewModel bot)
         {
             if (!CurrentUser.ActiveBots.Any(x => x.Symbol.Symbol == bot?.Symbol.Symbol))

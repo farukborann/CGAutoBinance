@@ -13,7 +13,7 @@ namespace WpfClient.UserControls
             InitializeComponent();
         }
 
-        private new void PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private new void PreviewPositiveDecimalInput(object sender, TextCompositionEventArgs e)
         {
             bool approvedDecimalPoint = false;
 
@@ -23,6 +23,28 @@ namespace WpfClient.UserControls
             }
 
             if (!(char.IsDigit(e.Text, e.Text.Length - 1) || approvedDecimalPoint))
+            {
+                e.Handled = true;
+            }
+        }
+        
+        private new void PreviewPositiveIntegerInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!char.IsDigit(e.Text, e.Text.Length - 1))
+            {
+                e.Handled = true;
+            }
+        }
+        private new void PreviewDecimalInput(object sender, TextCompositionEventArgs e)
+        {
+            bool approvedDecimalPoint = false;
+
+            if (e.Text == "." && !((TextBox)sender).Text.Contains('.'))
+            {
+                approvedDecimalPoint = true;
+            }
+
+            if (!(char.IsDigit(e.Text, e.Text.Length - 1) || e.Text == "-" || approvedDecimalPoint))
             {
                 e.Handled = true;
             }

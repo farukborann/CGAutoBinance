@@ -87,10 +87,11 @@
 
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="50"/>
                         </Grid.RowDefinitions>
-                        
+
                         <ListView x:Name="activeBotsListView" Grid.Row="0" Margin="15" ItemsSource="{Binding CurrentUser.ActiveBots}" SelectedItem="{Binding CurrentUser.SelectedBot}">
                             <ListView.View>
                                 <GridView>
@@ -112,6 +113,8 @@
                                 </GridView>
                             </ListView.View>
                         </ListView>
+
+                        <Button Content="Programı Sonlandır" Background="#DB374C" Height="30" Grid.Row="2" Margin="5" Command="{Binding IExitCommand}"/>
                     </Grid>
 
                     <Grid Grid.Column="2">

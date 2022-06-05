@@ -25,6 +25,8 @@ namespace WpfClient.ViewModels
             {
                 price = value;
                 RaisePropertyChangedEvent(nameof(Price));
+                RaisePropertyChangedEvent(nameof(BotViewModel.ProfitTextLong));
+                RaisePropertyChangedEvent(nameof(BotViewModel.ProfitTextShort));
             }
         }
 

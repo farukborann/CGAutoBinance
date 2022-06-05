@@ -60,7 +60,7 @@ namespace WpfClient.UserControls {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/AutoBinance;V1.0.0.0;component/usercontrols/symbolusercontrol.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/AutoBinance;component/usercontrols/symbolusercontrol.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\UserControls\SymbolUserControl.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
