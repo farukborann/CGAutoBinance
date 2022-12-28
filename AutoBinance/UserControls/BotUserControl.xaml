@@ -1,0 +1,196 @@
+﻿<UserControl x:Class="WpfClient.UserControls.BotUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             Name="SymbolControl"
+             d:DesignHeight="500" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    
+    <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="200*" />
+        </Grid.RowDefinitions>
+        <GroupBox Grid.Row="0" Margin="10">
+            <GroupBox.Header>
+                <TextBlock Text="Bot" FontSize="20"/>
+            </GroupBox.Header>
+
+            <StackPanel>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4*" />
+                        <RowDefinition Height="4*" />
+                        <RowDefinition Height="3*" />
+                        <RowDefinition Height="4*" />
+                        <RowDefinition Height="3*" />
+                        <RowDefinition Height="4*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="İlk işlem (Stop Market)" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                    <Grid Grid.Column="1" Grid.Row="0">
+                        <TextBox x:Name="FirstOrderSizeTextBox" Margin="5" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Text="{Binding CurrentUser.SelectedBot.FirstOrderSize}" />
+                        <TextBlock IsHitTestVisible="False" Text="Size First Order" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=FirstOrderSizeTextBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                    <Button Margin="5" Grid.Column="2" Grid.Row="0" BorderThickness="0" Focusable="False" FontSize="10.5" Command="{Binding CurrentUser.SelectedBot.ISideChangeCommand}" Content="{Binding CurrentUser.SelectedBot.FirstOrderTypeString}" Background="{Binding CurrentUser.SelectedBot.FirstOrderTypeColor}"/>
+
+                    <Expander Margin="2" x:Name="Expander1" ExpandDirection="Down" IsExpanded="False" HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="3">
+                        <Expander.Header>
+                            <Grid Background="#252525" Margin="3,-3,-3,-3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Margin="5,0,0,0" Text="Long Parametreleri" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="1" />
+                                <Grid Grid.Column="1" Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+                                    <TextBox x:Name="UpperSizeTextBox" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Margin="5" Text="{Binding CurrentUser.SelectedBot.SizeLong}" Grid.Column="1" />
+                                    <TextBlock IsHitTestVisible="False" Text="Size Long" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=UpperSizeTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Grid.Column="2" Grid.Row="1">
+                                    <TextBox x:Name="UpperStopPriceTextBox" HorizontalAlignment="Stretch" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Margin="5" Text="{Binding CurrentUser.SelectedBot.StopPriceLong}" Grid.Column="1" />
+                                    <TextBlock IsHitTestVisible="False" Text="Stop Price Long" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=UpperStopPriceTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </Grid>
+                        </Expander.Header>
+                        
+                        <Grid Margin="-5" Background="#252525">
+                            <TextBox Grid.Row="2" Margin="5" PreviewTextInput="PreviewPositiveIntegerInput" HorizontalAlignment="Left" TextAlignment="Right" Width="75" Text="{Binding CurrentUser.SelectedBot.CoinLeverageLong}" />
+                            <TextBlock Text="x Kaldıraçla " Grid.Row="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="85,0,0,0" FontSize="13"/>
+                            <TextBox Grid.Row="2" Margin="155,5,0,5" PreviewTextInput="PreviewDecimalInput" HorizontalAlignment="Left" TextAlignment="Right" Width="75" Text="{Binding CurrentUser.SelectedBot.ProfitUSDTLong}" />
+                            <TextBlock Text="{Binding CurrentUser.SelectedBot.ProfitTextLong}" Grid.Row="2" Grid.ColumnSpan="2"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="235,0,0,0" FontSize="13"/>
+                        </Grid>
+                    </Expander>
+
+                    <Expander Margin="2" ExpandDirection="Down" IsExpanded="False" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="3">
+                        <Expander.Header>
+                            <Grid Margin="3,-3,-3,-3" Background="#252525">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock  Margin="5,0,0,0" Grid.Row="3" Text="Short Parametreleri" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="0" />
+                                <Grid Grid.Column="1" Grid.Row="3">
+                                    <TextBox x:Name="LowerSizeTextBox" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Margin="5" Text="{Binding CurrentUser.SelectedBot.SizeShort}" Grid.Column="1" />
+                                    <TextBlock IsHitTestVisible="False" Text="Size Short" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=LowerSizeTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Grid.Column="2" Grid.Row="3">
+                                    <TextBox x:Name="LowerStopPriceTextBox" HorizontalAlignment="Stretch" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Margin="5" Text="{Binding CurrentUser.SelectedBot.StopPriceShort}" Grid.Column="1" />
+                                    <TextBlock IsHitTestVisible="False" Text="Stop Price Short" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
+                                        <TextBlock.Style>
+                                            <Style TargetType="{x:Type TextBlock}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=LowerStopPriceTextBox}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </Grid>
+                        </Expander.Header>
+
+                        <Grid Margin="-5" Background="#252525">
+                            <TextBox Grid.Row="4" Height="30" Margin="5" PreviewTextInput="PreviewPositiveIntegerInput" HorizontalAlignment="Left" TextAlignment="Right" Width="75" Text="{Binding CurrentUser.SelectedBot.CoinLeverageShort}" />
+                            <TextBlock Text="x Kaldıraçla " Grid.Row="4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="85,0,0,0" FontSize="13"/>
+                            <TextBox Grid.Row="4" Height="30" Margin="155,0,0,0" PreviewTextInput="PreviewDecimalInput" HorizontalAlignment="Left" TextAlignment="Right" Width="75" Text="{Binding CurrentUser.SelectedBot.ProfitUSDTShort}" />
+                            <TextBlock Text="{Binding CurrentUser.SelectedBot.ProfitTextShort}" Grid.Row="4" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="235,0,0,0" FontSize="13"/>
+                        </Grid>
+                    </Expander>
+
+
+
+
+                    <Button FontSize="10" Grid.Column="2" Grid.Row="4" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,0,0" Command="{Binding IBotCommand}" Content="{Binding CurrentUser.SelectedBot.IsEnabledString}" />
+                    <Button FontSize="10" Grid.Column="2" Grid.Row="4" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,125,0" Command="{Binding IResetBotCommand}" Content="Sıfırla" />
+                </Grid>
+                <Grid Margin="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+
+                </Grid>
+
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Margin="10" Grid.Row="1" Grid.ColumnSpan="2">
+            <GroupBox.Header>
+                <TextBlock Text="Loglar" FontSize="20"></TextBlock>
+            </GroupBox.Header>
+            <ListBox x:Name="logsListView" Margin="5" ItemsSource="{Binding CurrentUser.SelectedBot.Logs}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding }" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </GroupBox>
+    </Grid>
+</UserControl>
