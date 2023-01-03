@@ -1,180 +1,37 @@
 ﻿using Binance.Net.Clients;
 using Binance.Net.Enums;
 using Binance.Net.Objects;
+using Binance.Net;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using WpfClient.MessageBox;
-using WpfClient.MVVM;
+using AutoBinance.Models;
+using AutoBinance.MessageBox;
+using System.Threading;
 
-namespace WpfClient.ViewModels
+namespace AutoBinance.ViewModels
 {
-    public class UserViewModel : ObservableObject
+    public class UserViewModel : UserModel
     {
-        private bool _shownCredentailsMessage = false;
+        private bool isUsdStartStreamErrorMessageShowed;
+        private bool isUsdSubscribeUserUpdatesErrorMessageShowed;
 
-        public BinanceClient Client { get; set; }
-        public BinanceSocketClient SocketClient { get; set; }
         public CancellationTokenSource MainCancelSource { get; set; }
         private readonly CancellationTokenSource UsdCancelSource;
 
         private readonly IMessageBoxService messageBoxService = new MessageBoxService();
 
-        private bool isUsdStartStreamErrorMessageShowed;
-        private bool isUsdSubscribeUserUpdatesErrorMessageShowed;
-
-        private string username;
-        public string Username
+        public UserViewModel(string Username, string ApiKey, string ApiSecret) : base(Username, ApiKey, ApiSecret)
         {
-            get { return username; }
-            set
-            {
-                username = value;
-                RaisePropertyChangedEvent(nameof(Username));
-            }
-        }
-
-        private string apiKey;
-        public string ApiKey
-        {
-            get { return apiKey; }
-            set
-            {
-                apiKey = value;
-                RaisePropertyChangedEvent(nameof(ApiKey));
-            }
-        }
-
-        private string apiSecret;
-        public string ApiSecret
-        {
-            get { return apiSecret; }
-            set
-            {
-                apiSecret = value;
-                RaisePropertyChangedEvent(nameof(ApiSecret));
-            }
-        }        
-        
-        public string ListenKey {  get; set; }
-
-        public bool SymbolIsSelected => SelectedSymbol != null;
-        public bool IsCredentialed => !string.IsNullOrEmpty(ApiKey) && !string.IsNullOrEmpty(apiSecret) && SymbolIsSelected;
-
-        private SymbolViewModel? selectedSymbol;
-        public SymbolViewModel? SelectedSymbol
-        {
-            get { return selectedSymbol; }
-            set
-            {
-                selectedSymbol = value;
-                SelectedBot = GetBot();
-                RaisePropertyChangedEvent(nameof(SymbolIsSelected));
-                RaisePropertyChangedEvent(nameof(IsCredentialed));
-                RaisePropertyChangedEvent(nameof(SelectedBot));
-                RaisePropertyChangedEvent(nameof(SelectedSymbol));
-                ChangeSymbol();
-            }
-        }
-
-        private BotViewModel? selectedBot;
-        public BotViewModel? SelectedBot
-        {
-            get
-            {
-                return selectedBot;
-            }
-            set
-            {
-                selectedBot = value;
-                RaisePropertyChangedEvent(nameof(SelectedBot));
-            }
-        }
-
-        private ObservableCollection<SymbolViewModel> allPrices;
-        public ObservableCollection<SymbolViewModel> AllPrices
-        {
-            get { return allPrices; }
-            set
-            {
-                allPrices = value;
-                RaisePropertyChangedEvent(nameof(AllPrices));
-            }
-        }
-
-        private ObservableCollection<BotViewModel> activeBots;
-        public ObservableCollection<BotViewModel> ActiveBots
-        {
-            get { return activeBots; }
-            set
-            {
-                activeBots = value;
-                RaisePropertyChangedEvent(nameof(ActiveBots));
-            }
-        }        
-        
-        private ObservableCollection<BotViewModel> pausedBots;
-        public ObservableCollection<BotViewModel> PausedBots
-        {
-            get { return pausedBots; }
-            set
-            {
-                pausedBots = value;
-                RaisePropertyChangedEvent(nameof(PausedBots));
-            }
-        }
-
-        private ObservableCollection<string> logs;
-        public ObservableCollection<string> Logs
-        {
-            get { return logs; }
-            set
-            {
-                logs = value;
-                RaisePropertyChangedEvent(nameof(Logs));
-            }
-        }
-
-        public UserViewModel(string Username, string ApiKey, string ApiSecret)
-        {
-            username = Username;
-            apiKey = ApiKey;
-            apiSecret = ApiSecret;
-            Client = new();
-            SocketClient = new();
-            allPrices = new ObservableCollection<SymbolViewModel>();
-            logs = new ObservableCollection<string>();
-            ListenKey = "";
-
-            BinanceClient.SetDefaultOptions(new BinanceClientOptions()
-            {
-                UsdFuturesApiOptions = new BinanceApiClientOptions()
-                {
-                    TradeRulesBehaviour = TradeRulesBehaviour.AutoComply,
-                },
-                CoinFuturesApiOptions = new BinanceApiClientOptions()
-                {
-                    TradeRulesBehaviour = TradeRulesBehaviour.AutoComply,
-                }
-            });
-
-            Logs = new ObservableCollection<string>();
-
-            InitalizeClients();
-            Task.Run(() => SubscribeUserUpdates());
-
-
             MainCancelSource = new CancellationTokenSource();
             UsdCancelSource = new CancellationTokenSource();
 
             isUsdStartStreamErrorMessageShowed = false;
             isUsdSubscribeUserUpdatesErrorMessageShowed = false;
 
-            activeBots = new ObservableCollection<BotViewModel>();
-            pausedBots = new ObservableCollection<BotViewModel>();
-
+            InitalizeClients();
+            Task.Run(() => SubscribeUserUpdates());
         }
 
         public void AddLog(string log)
@@ -185,7 +42,7 @@ namespace WpfClient.ViewModels
             });
         }
 
-        public void ChangeSymbol()
+        public override void ChangeSymbol()
         {
             if (SelectedSymbol != null)
             {
@@ -200,7 +57,7 @@ namespace WpfClient.ViewModels
             
             if (resultUsd.Success)
             {
-                AllPrices = new ObservableCollection<SymbolViewModel>( resultUsd.Data.Select(r => new SymbolViewModel(r.Symbol, r.Price)).OrderBy(x => x.Symbol) );
+                AllPrices = new ObservableCollection<SymbolModel>( resultUsd.Data.Select(r => new SymbolModel(r.Symbol, r.Price)).OrderBy(x => x.Symbol) );
             }
             else
             {
@@ -222,12 +79,12 @@ namespace WpfClient.ViewModels
                 messageBoxService.ShowMessage($"Binance fiyat güncellemelerine katılmada hata (Usd Futures) : {subscribeResult.Error}", "error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        public async Task GetOpenOrders(SymbolViewModel? symbol)
+        public async Task GetOpenOrders(SymbolModel? symbol)
         {
             if (symbol == null)
                 return;
 
-            if (string.IsNullOrEmpty(apiKey))
+            if (string.IsNullOrEmpty(ApiKey))
             {
                 if (!_shownCredentailsMessage)
                 {
@@ -240,7 +97,7 @@ namespace WpfClient.ViewModels
             var resultUsd = await Client.UsdFuturesApi.Trading.GetOpenOrdersAsync(symbol.Symbol);
             if (resultUsd.Success)
             {
-                symbol.Orders = new ObservableCollection<OrderViewModel>(resultUsd.Data.OrderByDescending(d => d.CreateTime).Select(o => new OrderViewModel()
+                symbol.Orders = new ObservableCollection<OrderModel>(resultUsd.Data.OrderByDescending(d => d.CreateTime).Select(o => new OrderModel()
                 {
                     Id = o.Id,
                     Time = o.CreateTime,
@@ -259,7 +116,7 @@ namespace WpfClient.ViewModels
             
         }
 
-        public async Task Get24HourStats(SymbolViewModel symbol)
+        public async Task Get24HourStats(SymbolModel symbol)
         {
             var resultUsd = await Client.UsdFuturesApi.ExchangeData.GetTickerAsync(symbol.Symbol);
             if (resultUsd.Success)
@@ -277,30 +134,21 @@ namespace WpfClient.ViewModels
 
         public void InitalizeClients()
         {
-            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+            if (string.IsNullOrEmpty(ApiKey) || string.IsNullOrEmpty(ApiSecret))
             {
                 Client = new BinanceClient();
                 SocketClient = new BinanceSocketClient();
             }
             else
             {
-                Client = new BinanceClient(new BinanceClientOptions() { ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(apiKey, apiSecret) });
-                SocketClient = new BinanceSocketClient(new BinanceSocketClientOptions() { ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(apiKey, apiSecret) });
+                Client = new BinanceClient(new BinanceClientOptions() { ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(ApiKey, ApiSecret) });
+                SocketClient = new BinanceSocketClient(new BinanceSocketClientOptions() { ApiCredentials = new CryptoExchange.Net.Authentication.ApiCredentials(ApiKey, ApiSecret) });
             }
         }
 
-        public BotViewModel GetBot()
-        {
-            if (ActiveBots.Any(x => x.Symbol.Symbol.Equals(selectedSymbol?.Symbol))) 
-                return ActiveBots.First(x => x.Symbol.Symbol.Equals(selectedSymbol?.Symbol));
 
-            if (PausedBots.Any(x => x.Symbol.Symbol.Equals(selectedSymbol?.Symbol))) 
-                return PausedBots.First(x => x.Symbol.Symbol.Equals(selectedSymbol?.Symbol));
 
-            return new BotViewModel(selectedSymbol ?? new SymbolViewModel(null, null));
-        }
-
-        public async Task StartBot(BotViewModel bot)
+        public async Task StartBot(BotModel bot)
         {
             if(PausedBots.Any(x => x.Equals(bot)))
             {
@@ -355,7 +203,7 @@ namespace WpfClient.ViewModels
                 else
                 {
                     messageBoxService.ShowMessage($"Başlangıç açık emri verilemedi. Hata : {(resultOpenOrder.Error == null ? "NULL" : resultOpenOrder.Error.Message)}", "Hata !", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
+                    //return;
                 }
 
                 // Open first order from market
@@ -390,7 +238,7 @@ namespace WpfClient.ViewModels
             }
         }
 
-        public void PauseBot(BotViewModel bot)
+        public void PauseBot(BotModel bot)
         {
             ActiveBots.Remove(bot);
             bot.IsEnabled = false;
@@ -401,7 +249,7 @@ namespace WpfClient.ViewModels
             SelectedBot = bot;
         }
         
-        public Task ResetBot(BotViewModel bot)
+        public Task ResetBot(BotModel bot)
         {
             if(ActiveBots.Any(x => x.Symbol.Symbol.Equals(bot.Symbol.Symbol)))
             {
@@ -413,12 +261,12 @@ namespace WpfClient.ViewModels
                 PausedBots.Remove(bot);
             }
 
-            SelectedBot = new BotViewModel(SelectedSymbol);
+            SelectedBot = new BotModel(SelectedSymbol);
 
             return Task.CompletedTask;
         }
 
-        private async Task PlaceReverseOpenOrderAsync(BotViewModel bot)
+        private async Task PlaceReverseOpenOrderAsync(BotModel bot)
         {
             var price = bot.LastOpenOrderPositionSide == PositionSide.Long ? (bot.SizeShort ?? 0)/ bot.StopPriceShort
                                                                            : (bot.SizeLong ?? 0)/ bot.StopPriceLong;

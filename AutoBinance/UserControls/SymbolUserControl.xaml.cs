@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace WpfClient.UserControls
+namespace AutoBinance.UserControls
 {
     /// <summary>
     /// Interaction logic for SymbolUserControl.xaml

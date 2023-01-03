@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using WpfClient.MVVM;
+using AutoBinance.Models;
+using AutoBinance.MVVM;
 
-namespace WpfClient.ViewModels
+namespace AutoBinance.ViewModels
 {
     public class MainViewModel : ObservableObject
     {
@@ -195,7 +196,7 @@ namespace WpfClient.ViewModels
             Environment.Exit(0);
         }        
         
-        public async Task BotCommand(BotViewModel bot)
+        public async Task BotCommand(BotModel bot)
         {
             if (!CurrentUser.ActiveBots.Any(x => x.Symbol.Symbol == bot?.Symbol.Symbol))
             {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace WpfClient.MVVM
+namespace AutoBinance.MVVM
 {
     public class DelegateCommand : ICommand
     {

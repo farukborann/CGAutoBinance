@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace WpfClient.MVVM
+namespace AutoBinance.MVVM
 {
     public class ObservableObject : INotifyPropertyChanged
     {

@@ -1,8 +1,4 @@
-﻿using System.Net.NetworkInformation;
-using System.Threading.Tasks;
-using System.Windows.Media;
-
-namespace WpfClient
+﻿namespace AutoBinance
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

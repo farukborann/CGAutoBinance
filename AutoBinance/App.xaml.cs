@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace WpfClient
+namespace AutoBinance
 {
     /// <summary>
     /// Interaction logic for App.xaml
