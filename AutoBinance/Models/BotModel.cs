@@ -115,6 +115,18 @@ namespace AutoBinance.Models
             }
         }
 
+        //Size Change
+        private decimal? sizeChange;
+        public decimal? SizeChange
+        {
+            get { return sizeChange; }
+            set
+            {
+                sizeChange = value;
+                RaisePropertyChangedEvent(nameof(SizeChange));
+            }
+        }
+
         private decimal? sizeShort;
         public decimal? SizeShort
         {

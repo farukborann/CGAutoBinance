@@ -131,6 +131,9 @@ namespace AutoBinance.Models
             username = Username;
             apiKey = ApiKey;
             apiSecret = ApiSecret;
+
+
+
             Client = new();
             SocketClient = new();
             allPrices = new ObservableCollection<SymbolModel>();
@@ -142,12 +145,22 @@ namespace AutoBinance.Models
                 UsdFuturesApiOptions = new BinanceApiClientOptions()
                 {
                     TradeRulesBehaviour = TradeRulesBehaviour.AutoComply,
+                    //BaseAddress = "https://testnet.binancefuture.com"
                 },
                 CoinFuturesApiOptions = new BinanceApiClientOptions()
                 {
                     TradeRulesBehaviour = TradeRulesBehaviour.AutoComply,
+                    //BaseAddress = "https://testnet.binancefuture.com"
                 }
             });
+
+            //BinanceSocketClient.SetDefaultOptions(new BinanceSocketClientOptions()
+            //{
+            //    UsdFuturesStreamsOptions = new BinanceApiClientOptions()
+            //    {
+            //        BaseAddress = "wss://stream.binancefuture.com/ws/",
+            //    }
+            //});
 
             Logs = new ObservableCollection<string>();
 

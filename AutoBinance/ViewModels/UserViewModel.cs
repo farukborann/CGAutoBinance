@@ -1,7 +1,6 @@
 ﻿using Binance.Net.Clients;
 using Binance.Net.Enums;
 using Binance.Net.Objects;
-using Binance.Net;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -203,7 +202,7 @@ namespace AutoBinance.ViewModels
                 else
                 {
                     messageBoxService.ShowMessage($"Başlangıç açık emri verilemedi. Hata : {(resultOpenOrder.Error == null ? "NULL" : resultOpenOrder.Error.Message)}", "Hata !", MessageBoxButton.OK, MessageBoxImage.Error);
-                    //return;
+                    return;
                 }
 
                 // Open first order from market
@@ -211,7 +210,7 @@ namespace AutoBinance.ViewModels
                                         bot.Symbol.Symbol,
                                         bot.FirstOrderType == PositionSide.Long ? OrderSide.Buy : OrderSide.Sell,
                                         FuturesOrderType.Market,
-                                        decimal.Round(bot.FirstOrderSize ?? 0 / bot.Symbol.Price, 1),
+                                        bot.FirstOrderSize / bot.Symbol.Price,
                                         positionSide: bot.FirstOrderType);
 
                 if (resultOrder.Success)
@@ -268,8 +267,18 @@ namespace AutoBinance.ViewModels
 
         private async Task PlaceReverseOpenOrderAsync(BotModel bot)
         {
-            var price = bot.LastOpenOrderPositionSide == PositionSide.Long ? (bot.SizeShort ?? 0)/ bot.StopPriceShort
-                                                                           : (bot.SizeLong ?? 0)/ bot.StopPriceLong;
+            decimal? price;
+            if (bot.LastOpenOrderPositionSide == PositionSide.Long)
+            {
+                price = bot.SizeShort / bot.StopPriceShort;
+                bot.SizeShort -= bot.SizeChange;
+
+            } else
+            {
+                price = bot.SizeLong / bot.StopPriceLong;
+                bot.SizeShort -= bot.SizeChange;
+            }
+
             var result = await Client.UsdFuturesApi.Trading.PlaceOrderAsync(
                                                                     bot.Symbol.Symbol,
                                                                     bot.LastOpenOrderPositionSide == PositionSide.Short ? OrderSide.Buy : OrderSide.Sell,
