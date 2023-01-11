@@ -115,6 +115,18 @@ namespace AutoBinance.Models
             }
         }
 
+        //Price Change
+        private decimal? priceChange;
+        public decimal? PriceChange
+        {
+            get { return priceChange; }
+            set
+            {
+                priceChange = value;
+                RaisePropertyChangedEvent(nameof(PriceChange));
+            }
+        }
+
         //Size Change
         private decimal? sizeChange;
         public decimal? SizeChange
@@ -136,6 +148,18 @@ namespace AutoBinance.Models
                 sizeShort = value;
                 RaisePropertyChangedEvent(nameof(SizeShort));
                 RaisePropertyChangedEvent(nameof(ProfitTextShort));
+            }
+        }
+
+        //Size Change
+        private bool reverseMode;
+        public bool ReverseMode
+        {
+            get { return reverseMode; }
+            set
+            {
+                reverseMode = value;
+                RaisePropertyChangedEvent(nameof(ReverseMode));
             }
         }
 
@@ -252,6 +276,9 @@ namespace AutoBinance.Models
             LastOpenOrderPositionSide = FirstOrderType == PositionSide.Long ? PositionSide.Short : PositionSide.Long;
 
             ExpiredOrderUpdated = false;
+            SizeChange = 0;
+            PriceChange = 0;
+            ReverseMode = false;
 
             Logs = new ObservableCollection<string>();
         }

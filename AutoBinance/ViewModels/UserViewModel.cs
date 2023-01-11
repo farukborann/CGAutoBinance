@@ -172,8 +172,18 @@ namespace AutoBinance.ViewModels
                 OrderSide side;
                 decimal? quan;
                 decimal? stopPrice;
+                FuturesOrderType orderType;
 
-                if(bot.FirstOrderType == PositionSide.Long)
+                if(bot.ReverseMode)
+                {
+                    orderType = FuturesOrderType.TakeProfitMarket;
+                }
+                else
+                {
+                    orderType = FuturesOrderType.StopMarket;
+                }
+
+                if (bot.FirstOrderType == PositionSide.Long)
                 {
                     side = OrderSide.Sell;
                     quan = bot.SizeShort / bot.StopPriceShort;
@@ -186,9 +196,11 @@ namespace AutoBinance.ViewModels
                     stopPrice = bot.StopPriceLong;
                 }
 
+
                 var resultOpenOrder = await Client.UsdFuturesApi.Trading.PlaceOrderAsync(
-                                        bot.Symbol.Symbol, side,
-                                        FuturesOrderType.StopMarket,
+                                        bot.Symbol.Symbol,
+                                        side,
+                                        orderType,
                                         quan, stopPrice: stopPrice,
                                         workingType: WorkingType.Mark,
                                         positionSide: bot.LastOpenOrderPositionSide);
@@ -268,29 +280,59 @@ namespace AutoBinance.ViewModels
         private async Task PlaceReverseOpenOrderAsync(BotModel bot)
         {
             decimal? price;
+            decimal? stopPrice;
+            OrderSide orderSide;
+            PositionSide positionSide;
+            FuturesOrderType orderType;
+
+            if (bot.ReverseMode)
+            {
+                orderType = FuturesOrderType.TakeProfitMarket;
+            }
+            else
+            {
+                orderType = FuturesOrderType.StopMarket;
+            }
+
             if (bot.LastOpenOrderPositionSide == PositionSide.Long)
             {
                 price = bot.SizeShort / bot.StopPriceShort;
-                bot.SizeShort -= bot.SizeChange;
-
-            } else
+                orderSide = OrderSide.Sell;
+                positionSide = PositionSide.Short;
+                stopPrice = bot.StopPriceShort;
+            }
+            else
             {
                 price = bot.SizeLong / bot.StopPriceLong;
-                bot.SizeShort -= bot.SizeChange;
+                orderSide = OrderSide.Buy;
+                positionSide = PositionSide.Long;
+                stopPrice = bot.StopPriceLong;
             }
 
             var result = await Client.UsdFuturesApi.Trading.PlaceOrderAsync(
                                                                     bot.Symbol.Symbol,
-                                                                    bot.LastOpenOrderPositionSide == PositionSide.Short ? OrderSide.Buy : OrderSide.Sell,
-                                                                    FuturesOrderType.StopMarket,
+                                                                    orderSide,
+                                                                    orderType,
                                                                     price,
                                                                     workingType: WorkingType.Mark,
-                                                                    positionSide: bot.LastOpenOrderPositionSide == PositionSide.Short ? PositionSide.Long : PositionSide.Short,
-                                                                    stopPrice: bot.LastOpenOrderPositionSide == PositionSide.Long ? bot.StopPriceShort : bot.StopPriceLong);
+                                                                    positionSide: positionSide,
+                                                                    stopPrice: stopPrice);
             if (result.Success)
             {
+                if(bot.LastOpenOrderPositionSide == PositionSide.Short)
+                {
+                    bot.SizeShort += bot.SizeChange;
+                    bot.StopPriceShort -= bot.PriceChange;
+                    bot.LastOpenOrderPositionSide = PositionSide.Long;
+                }
+                else
+                {
+                    bot.SizeLong += bot.SizeChange;
+                    bot.StopPriceLong += bot.PriceChange;
+                    bot.LastOpenOrderPositionSide = PositionSide.Short;
+                }
+
                 bot.LastOpenOrderId = result.Data.Id;
-                bot.LastOpenOrderPositionSide = bot.LastOpenOrderPositionSide == PositionSide.Short ? PositionSide.Long : PositionSide.Short;
                 bot.ExpiredOrderUpdated = false;
                 bot.AddLog($"Yeni açık emir başarıyla verildi. Id : {result.Data.Id}");
             }
@@ -349,7 +391,7 @@ namespace AutoBinance.ViewModels
                         {
                             bot.ExpiredOrderUpdated = true;
                         }
-                        else if (orderUpdate.Status == OrderStatus.New && bot.ExpiredOrderUpdated)
+                        else if ((orderUpdate.Status == OrderStatus.New && bot.ExpiredOrderUpdated)) // || orderUpdate.Status == OrderStatus.Canceled
                         {
                             await PlaceReverseOpenOrderAsync(bot);
                         }

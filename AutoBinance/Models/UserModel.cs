@@ -158,7 +158,7 @@ namespace AutoBinance.Models
             //{
             //    UsdFuturesStreamsOptions = new BinanceApiClientOptions()
             //    {
-            //        BaseAddress = "wss://stream.binancefuture.com/ws/",
+            //        BaseAddress = "wss://stream.binancefuture.com/",
             //    }
             //});
 

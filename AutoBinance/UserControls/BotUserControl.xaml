@@ -30,9 +30,9 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="4*" />
                         <RowDefinition Height="4*" />
-                        <RowDefinition Height="3*" />
                         <RowDefinition Height="4*" />
-                        <RowDefinition Height="3*" />
+                        <RowDefinition Height="4*" />
+                        <RowDefinition Height="4*" />
                         <RowDefinition Height="4*" />
                     </Grid.RowDefinitions>
 
@@ -160,7 +160,7 @@
                         </Grid>
                     </Expander>
 
-                    <TextBlock Text="Otomatik Fiyat Değişimi (+,-)" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Row="3" />
+                    <TextBlock Text="Otomatik Hacim Değişimi (+,-)" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Row="3" />
                     <Grid Grid.Column="1" Grid.Row="3">
                         <TextBox x:Name="SizeChangeTextBox" Margin="5" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Text="{Binding CurrentUser.SelectedBot.SizeChange}" />
                         <TextBlock IsHitTestVisible="False" Text="Size Change" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
@@ -176,10 +176,27 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
+                    
+                    <TextBlock Text="Otomatik Fiyat Değişimi (+,-)" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Row="4" />
+                    <Grid Grid.Column="1" Grid.Row="4">
+                        <TextBox x:Name="PriceChangeTextBox" Margin="5" PreviewTextInput="PreviewPositiveDecimalInput" TextAlignment="Right" Text="{Binding CurrentUser.SelectedBot.PriceChange}" />
+                        <TextBlock IsHitTestVisible="False" Text="Price Change" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0" Foreground="DarkGray">
+                            <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=PriceChangeTextBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
 
-
-                    <Button FontSize="10" Grid.Column="2" Grid.Row="4" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,0,0" Command="{Binding IBotCommand}" Content="{Binding CurrentUser.SelectedBot.IsEnabledString}" />
-                    <Button FontSize="10" Grid.Column="2" Grid.Row="4" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,125,0" Command="{Binding IResetBotCommand}" Content="Sıfırla" />
+                    <CheckBox FontSize="10" Grid.Column="0" Grid.Row="5" Width="100" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,10,0,0" Content="Ters Mod" IsChecked="{Binding CurrentUser.SelectedBot.ReverseMode}" />
+                    <Button FontSize="10" Grid.Column="2" Grid.Row="5" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,0,0" Command="{Binding IBotCommand}" Content="{Binding CurrentUser.SelectedBot.IsEnabledString}" />
+                    <Button FontSize="10" Grid.Column="2" Grid.Row="5" Width="100" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,125,0" Command="{Binding IResetBotCommand}" Content="Sıfırla" />
                 </Grid>
                 <Grid Margin="5">
                     <Grid.ColumnDefinitions>
